@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nice News - Static Content Generator Tool</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap');
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+            color: #333;
+            padding: 40px 20px;
+        }
+        .wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-top: 5px solid #d32f2f;
+        }
+        h2 {
+            color: #d32f2f;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 700; margin-bottom: 8px; color: #111; }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        textarea { height: 250px; resize: vertical; }
+        .note { font-size: 0.85rem; color: #666; margin-top: 5px; font-style: italic; }
+        
+        .recommendation-box {
+            margin-top: 10px;
+            padding: 12px;
+            background-color: #fce4e4;
+            border-left: 4px solid #d32f2f;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            display: none;
+        }
+        .recommendation-box a { color: #d32f2f; font-weight: 700; text-decoration: none; }
+        
+        button {
+            width: 100%;
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        button:hover { background-color: #b71c1c; }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <h2>Nice News Content Generator</h2>
+    
+    <div class="form-group">
+        <label for="keyword">Keyword Berita (Main Topic):</label>
+        <input type="text" id="keyword" placeholder="Contoh: jake paul tyson fight live" autocomplete="off">
+        <div class="note">Keyword ini akan digunakan sebagai nama file HTML dan Thumbnail Image Link.</div>
+        
+        <div id="rec-box" class="recommendation-box">
+            Target URL Output Anda: <br>
+            <a href="#" id="rec-link" target="_blank">-</a>
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <label for="content">Isi Berita:</label>
+        <textarea id="content" placeholder="Baris Paling Atas Pasti Judul Berita (H1)&#10;&#10;Paragraf Pertama ditulis di sini...&#10;&#10;Paragraf Kedua ditulis di sini..."></textarea>
+    </div>
+    
+    <button onclick="generateAndDownload()">Generate HTML Statis</button>
+</div>
+
+<script>
+let baseDomain = "https://nicenews.github.io/"; 
+
+fetch('domain.txt')
+    .then(response => response.text())
+    .then(data => {
+        let domain = data.trim();
+        if (domain) {
+            domain = domain.replace(/\[.*?\]\s*/g, '').replace(/\s*/gi, '').trim(); 
+            if (!domain.startsWith('http://') && !domain.startsWith('https://')) {
+                domain = 'https://' + domain;
+            }
+            if (!domain.endsWith('/')) { domain += '/'; }
+            baseDomain = domain;
+        }
+    })
+    .catch(err => console.log('File domain.txt tidak ditemukan.'));
+
+const keywordInput = document.getElementById('keyword');
+const recBox = document.getElementById('rec-box');
+const recLink = document.getElementById('rec-link');
+
+keywordInput.addEventListener('input', function() {
+    const keywordText = this.value.trim();
+    if (keywordText.length > 0) {
+        const slug = keywordText.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-');
+        const fullUrl = baseDomain + slug;
+        recLink.href = fullUrl;
+        recLink.textContent = fullUrl;
+        recBox.style.display = 'block';
+    } else {
+        recBox.style.display = 'none';
+    }
+});
+
+function generateAndDownload() {
+    const keywordInputVal = document.getElementById('keyword').value.trim();
+    const contentInput = document.getElementById('content').value.trim();
+    
+    if (!keywordInputVal || !contentInput) {
+        alert('Mohon isi kolom Keyword dan Isi Berita!');
+        return;
+    }
+    
+    const keywordSlug = keywordInputVal.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-');
+    const fileName = keywordSlug + '.html';
+    const lines = contentInput.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    
+    const h1Title = lines[0]; 
+    const remainingParagraphs = lines.slice(1);
+    
+    // Teks Hidden Article
+    let hiddenArticle = `<div style="display:none; visibility:hidden;">
+            <h1>The Ultimate Guide to Making Money Online: Wealth Creation Through Trading and Cryptocurrency</h1>
+            <p>In today's rapidly evolving digital economy, learning how to make money online has transitioned from a niche concept into a highly lucrative global industry...</p>
+        </div>`;
+    
+    // Gambar Utama menjadi Tautan Thumbnail Image
+    const queryImage = keywordInputVal + " breaking news";
+    const mainImageUrl = 'https://tse1.mm.bing.net/th?q=' + encodeURIComponent(queryImage) + '&w=800&h=450&c=7&rs=1&p=0&dpr=1.5&pid=1.7';
+    let imageLinkHtml = `<div class="detail-image"><a href="${mainImageUrl}" target="_blank" title="View Image"><img src="${mainImageUrl}" alt="${h1Title}"></a></div>`;
+
+    let pBodyHtml = remainingParagraphs.map(p => `<p>${p}</p>`).join('\n');
+
+    let finalHtmlOutput = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${h1Title} | Nice News</title>
+    <meta name="robots" content="index, follow">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <center><script type="text/javascript" src='https://seribudollarperhari.github.io/banner/ad1.js'><\/script></center>
+    <header>
+        <div class="container">
+            <a href="index.html" class="logo-link"><div class="logo">Nice News</div></a>
+            <nav><ul><li><a href="index.html">Home</a></li></ul></nav>
+        </div>
+    </header>
+    <center><script type="text/javascript" src='https://seribudollarperhari.github.io/banner/ad2.js'><\/script></center>
+    
+    <main>
+        <div class="container">
+            <article class="main-article">
+                ${hiddenArticle}
+                <h1 id="detail-title">${h1Title}</h1>
+                ${imageLinkHtml}
+                <div id="detail-body" class="article-content">
+                    ${pBodyHtml}
+                </div>
+            </article>
+            
+            <center><script type="text/javascript" src='https://seribudollarperhari.github.io/banner/ad3.js'><\/script></center>
+            
+            <section class="related-posts-section">
+                <h3 class="section-title">Trending Now</h3>
+                <div id="related-posts-container" class="content-grid"></div>
+            </section>
+        </div>
+    </main>
+
+    <center><script type="text/javascript" src='https://seribudollarperhari.github.io/banner/nativ.js'><\/script></center>
+    <footer>
+        <div class="container"><p>&copy; 2026 Nice News - The Pulse of Trending Stories.</p></div>
+    </footer>
+
+    <script>
+        (function(){
+            const keywords = [
+                "${keywordInputVal} viral video",
+                "${keywordInputVal} latest update",
+                "${keywordInputVal} today",
+                "${keywordInputVal} breaking news",
+                "${keywordInputVal} real story",
+                "${keywordInputVal} live feed"
+            ];
+            const hookWords = ['Breaking:', 'Trending:', 'Watch:', 'Exclusive:', 'Viral:'];
+            const suffixWords = ['Revealed', 'Explained', 'Live Update', 'News'];
+            
+            const container = document.getElementById('related-posts-container');
+            if(container) {
+                let html = '';
+                keywords.forEach(term => {
+                    const clean = term.replace(/\\s/g, '-').toLowerCase();
+                    const linkUrl = 'index.html?q=' + encodeURIComponent(clean);
+                    const qImg = term + " breaking news";
+                    const imgUrl = 'https://tse1.mm.bing.net/th?q=' + encodeURIComponent(qImg) + '&w=400&h=250&c=7&rs=1&p=0&dpr=1.5&pid=1.7';
+                    
+                    const rHook = hookWords[Math.floor(Math.random() * hookWords.length)];
+                    const rSuffix = suffixWords[Math.floor(Math.random() * suffixWords.length)];
+                    const rTitle = rHook + ' ' + term.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') + ' ' + rSuffix;
+                    
+                    html += '<article class="content-card"><a href="' + linkUrl + '"><img src="' + imgUrl + '" alt="' + rTitle + '" loading="lazy"><div class="content-card-body"><h3>' + rTitle + '</h3></div></a></article>';
+                });
+                container.innerHTML = html;
+            }
+        })();
+    <\/script>
+</body>
+</html>`;
+
+    const blob = new Blob([finalHtmlOutput], { type: 'text/html;charset=utf-8;' });
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", fileName);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
+</script>
+</body>
+</html>
