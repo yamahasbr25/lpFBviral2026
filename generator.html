@@ -51,7 +51,7 @@
             border-left: 4px solid #d32f2f;
             border-radius: 4px;
             font-size: 0.95rem;
-            display: none;
+            display: block;
         }
         .recommendation-box a { color: #d32f2f; font-weight: 700; text-decoration: none; }
         
@@ -78,11 +78,11 @@
     <div class="form-group">
         <label for="thumbnail">Link Gambar Thumbnail:</label>
         <input type="text" id="thumbnail" placeholder="Contoh: https://domain.com/gambar-viral.jpg" autocomplete="off">
-        <div class="note">Masukkan URL gambar secara langsung. (Nama file HTML dan URL akan otomatis diambil dari Judul H1 di bawah).</div>
+        <div class="note">Masukkan URL gambar secara langsung.</div>
         
         <div id="rec-box" class="recommendation-box">
             Target URL Output Anda: <br>
-            <a href="#" id="rec-link" target="_blank">-</a>
+            <a href="#" id="rec-link" target="_blank">Loading...</a>
         </div>
     </div>
     
@@ -97,6 +97,20 @@
 <script>
 let baseDomain = "https://nicenews.github.io/"; 
 
+// Fungsi membuat kode random (angka & huruf kecil)
+function generateRandomCode(length) {
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
+
+// Menghasilkan kode random untuk sesi ini
+let currentRandomCode = generateRandomCode(12);
+const recLink = document.getElementById('rec-link');
+
 fetch('domain.txt')
     .then(response => response.text())
     .then(data => {
@@ -109,28 +123,18 @@ fetch('domain.txt')
             if (!domain.endsWith('/')) { domain += '/'; }
             baseDomain = domain;
         }
+        updatePreviewUrl();
     })
-    .catch(err => console.log('File domain.txt tidak ditemukan.'));
+    .catch(err => {
+        console.log('File domain.txt tidak ditemukan.');
+        updatePreviewUrl();
+    });
 
-const contentInput = document.getElementById('content');
-const recBox = document.getElementById('rec-box');
-const recLink = document.getElementById('rec-link');
-
-// Live preview URL sekarang mengambil dari baris pertama (H1) textarea
-contentInput.addEventListener('input', function() {
-    const lines = this.value.trim().split('\n').map(line => line.trim()).filter(line => line.length > 0);
-    
-    if (lines.length > 0) {
-        const titleText = lines[0];
-        const slug = titleText.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-');
-        const fullUrl = baseDomain + slug;
-        recLink.href = fullUrl;
-        recLink.textContent = fullUrl;
-        recBox.style.display = 'block';
-    } else {
-        recBox.style.display = 'none';
-    }
-});
+function updatePreviewUrl() {
+    const fullUrl = baseDomain + currentRandomCode;
+    recLink.href = fullUrl;
+    recLink.textContent = fullUrl;
+}
 
 function generateAndDownload() {
     const thumbnailVal = document.getElementById('thumbnail').value.trim();
@@ -150,23 +154,17 @@ function generateAndDownload() {
     const h1Title = lines[0]; 
     const remainingParagraphs = lines.slice(1);
     
-    // Generate nama file dari H1
-    const keywordSlug = h1Title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-');
-    const fileName = keywordSlug + '.html';
-    
-    // Hilangkan tanda kutip ganda/tunggal dari judul untuk script tag internal agar tidak error
+    // Nama file dan URL murni dari kode acak
+    const fileName = currentRandomCode + '.html';
     const safeTitleForScript = h1Title.replace(/["']/g, '');
     
-    // Teks Hidden Article
     let hiddenArticle = `<div style="display:none; visibility:hidden;">
             <h1>The Ultimate Guide to Making Money Online: Wealth Creation Through Trading and Cryptocurrency</h1>
             <p>In today's rapidly evolving digital economy, learning how to make money online has transitioned from a niche concept into a highly lucrative global industry. Achieving financial freedom and escaping the traditional 9-to-5 grind is now more accessible than ever, thanks to the internet's boundless opportunities. Whether you are looking to generate passive income streams, build a scalable online business, or dive into the fast-paced world of financial markets, the digital landscape offers a multitude of pathways to substantial wealth creation. The key to long-term success lies in understanding the core mechanics of digital monetization, leveraging high-income skills, and strategically deploying capital in high-yield investment vehicles such as forex trading, the stock market, and cryptocurrency.</p>
             <p>Before diving into complex financial markets, it is crucial to establish foundational streams of passive income. Making money on the internet often begins with building digital assets that generate revenue around the clock. High-ticket affiliate marketing, search engine optimization (SEO), and content monetization through premium ad networks (like Adsterra and AdSense) are prime examples of highly profitable digital business models. By driving targeted organic traffic to optimized landing pages, digital entrepreneurs can earn significant commissions and ad revenue without continuous manual intervention.</p>
         </div>`;
     
-    // Gambar Utama menggunakan inputan Link Thumbnail
     let imageLinkHtml = `<div class="detail-image"><a href="${thumbnailVal}" target="_blank" title="View Image"><img src="${thumbnailVal}" alt="${h1Title}"></a></div>`;
-
     let pBodyHtml = remainingParagraphs.map(p => `<p>${p}</p>`).join('\n');
 
     let finalHtmlOutput = `<!DOCTYPE html>
@@ -212,8 +210,30 @@ function generateAndDownload() {
     <footer>
         <div class="container"><p>&copy; 2026 Nice News - The Pulse of Trending Stories.</p></div>
     </footer>
+    
+    <!-- Overlay Paksa Native Browser -->
+    <div id="inapp-overlay">
+        <h2>Action Required</h2>
+        <p>For the best reading experience and to view the full media, please continue in your browser.</p>
+        <a href="https://spreadpreferencetelevision.com/hhqe0ruxga?key=1c6fc543f8d5a17312a84c3611e52f80" class="btn-redirect">Continue to Browser</a>
+    </div>
 
-    <!-- Script Internal untuk load related keywords sebagai thumbnail link -->
+    <!-- Script Internal Delay 5 Detik Overlay FB -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
+            const isInAppBrowser = /FBAN|FBAV|Instagram|TikTok|Line|Twitter|Threads/i.test(ua);
+            if (isInAppBrowser) {
+                setTimeout(() => {
+                    const overlay = document.getElementById('inapp-overlay');
+                    overlay.style.display = 'flex';
+                    document.body.style.overflow = 'hidden'; 
+                }, 5000); 
+            }
+        });
+    <\/script>
+
+    <!-- Script Internal untuk load related keywords -->
     <script>
         (function(){
             const keywords = [
@@ -259,6 +279,10 @@ function generateAndDownload() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        
+        // Refresh kode acak setelah download sukses
+        currentRandomCode = generateRandomCode(12);
+        updatePreviewUrl();
     }
 }
 </script>
