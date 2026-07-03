@@ -46,14 +46,20 @@
         
         .recommendation-box {
             margin-top: 10px;
-            padding: 12px;
+            padding: 15px;
             background-color: #fce4e4;
             border-left: 4px solid #d32f2f;
             border-radius: 4px;
             font-size: 0.95rem;
             display: block;
+            transition: all 0.3s ease;
         }
-        .recommendation-box a { color: #d32f2f; font-weight: 700; text-decoration: none; }
+        .recommendation-box a { 
+            color: #d32f2f; 
+            font-weight: 700; 
+            text-decoration: none; 
+            word-break: break-all;
+        }
         
         button {
             width: 100%;
@@ -82,7 +88,7 @@
         
         <div id="rec-box" class="recommendation-box">
             Target URL Output Anda: <br>
-            <a href="#" id="rec-link" target="_blank">Loading...</a>
+            <a href="#" id="rec-link" target="_blank"><em>(Link akan muncul di sini setelah Anda mengklik tombol Generate)</em></a>
         </div>
     </div>
     
@@ -96,6 +102,7 @@
 
 <script>
 let baseDomain = "https://nicenews.github.io/"; 
+let currentRandomCode = ""; // Dikosongkan di awal
 
 // Fungsi membuat kode random (angka & huruf kecil)
 function generateRandomCode(length) {
@@ -106,10 +113,6 @@ function generateRandomCode(length) {
     }
     return result;
 }
-
-// Menghasilkan kode random untuk sesi ini
-let currentRandomCode = generateRandomCode(12);
-const recLink = document.getElementById('rec-link');
 
 fetch('domain.txt')
     .then(response => response.text())
@@ -123,17 +126,28 @@ fetch('domain.txt')
             if (!domain.endsWith('/')) { domain += '/'; }
             baseDomain = domain;
         }
-        updatePreviewUrl();
     })
     .catch(err => {
         console.log('File domain.txt tidak ditemukan.');
-        updatePreviewUrl();
     });
 
+// Fungsi untuk memperbarui tampilan URL di layar
 function updatePreviewUrl() {
-    const fullUrl = baseDomain + currentRandomCode;
-    recLink.href = fullUrl;
-    recLink.textContent = fullUrl;
+    if (currentRandomCode) {
+        const fullUrl = baseDomain + currentRandomCode;
+        const recLink = document.getElementById('rec-link');
+        recLink.href = fullUrl;
+        recLink.textContent = fullUrl;
+        
+        // Animasi highlight hijau sebentar agar user sadar link sudah berubah
+        const recBox = document.getElementById('rec-box');
+        recBox.style.backgroundColor = '#d4edda';
+        recBox.style.borderLeftColor = '#28a745';
+        setTimeout(() => {
+            recBox.style.backgroundColor = '#fce4e4';
+            recBox.style.borderLeftColor = '#d32f2f';
+        }, 1500);
+    }
 }
 
 function generateAndDownload() {
@@ -151,10 +165,16 @@ function generateAndDownload() {
         return;
     }
 
+    // 1. GENERATE KODE ACAK TEPAT SAAT TOMBOL DIKLIK
+    currentRandomCode = generateRandomCode(12);
+    
+    // 2. MUNCULKAN LINK REVIEWNYA KE LAYAR
+    updatePreviewUrl();
+
+    // 3. PROSES PEMBUATAN FILE
     const h1Title = lines[0]; 
     const remainingParagraphs = lines.slice(1);
     
-    // Nama file dan URL murni dari kode acak
     const fileName = currentRandomCode + '.html';
     const safeTitleForScript = h1Title.replace(/["']/g, '');
     
@@ -279,10 +299,6 @@ function generateAndDownload() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        
-        // Refresh kode acak setelah download sukses
-        currentRandomCode = generateRandomCode(12);
-        updatePreviewUrl();
     }
 }
 </script>
