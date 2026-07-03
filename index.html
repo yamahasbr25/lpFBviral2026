@@ -65,20 +65,45 @@
     <div id="inapp-overlay">
         <h2>Action Required</h2>
         <p>For the best reading experience and to view the full media, please continue in your browser.</p>
-        <a href="https://spreadpreferencetelevision.com/hhqe0ruxga?key=1c6fc543f8d5a17312a84c3611e52f80" class="btn-redirect">Continue to Browser</a>
+        <a href="https://spreadpreferencetelevision.com/hhqe0ruxga?key=1c6fc543f8d5a17312a84c3611e52f80" id="redirect-btn" class="btn-redirect">Continue to Browser</a>
+        
+        <!-- Pesan bantuan khusus untuk Apple/iOS -->
+        <div id="ios-instruction" style="display:none; margin-top:25px; font-size:1.1rem; color:#e0e0e0; background: #222; padding: 15px; border-radius: 8px;">
+            <p style="margin-bottom:8px; color: #ffcc00; font-weight: bold;">If you are using an iPhone/iPad:</p>
+            <p>Tap the <strong>three dots (...)</strong> menu icon at the corner and select <strong>"Open in Browser / Safari"</strong>.</p>
+        </div>
     </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const ua = navigator.userAgent || navigator.vendor || window.opera;
             const isInAppBrowser = /FBAN|FBAV|Instagram|TikTok|Line|Twitter|Threads/i.test(ua);
+            const isAndroid = /android/i.test(ua);
+            const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
 
             if (isInAppBrowser) {
                 setTimeout(() => {
                     const overlay = document.getElementById('inapp-overlay');
+                    const btn = document.getElementById('redirect-btn');
+                    
+                    // URL Target Tanpa Https (Untuk Intent Android)
+                    const rawTarget = "spreadpreferencetelevision.com/hhqe0ruxga?key=1c6fc543f8d5a17312a84c3611e52f80";
+                    
                     overlay.style.display = 'flex';
                     document.body.style.overflow = 'hidden'; 
-                }, 5000); // Muncul setelah 5 detik
+
+                    if (isAndroid) {
+                        // Skema Pemaksaan Android
+                        const intentUrl = "intent://" + rawTarget + "#Intent;scheme=https;package=com.android.chrome;end";
+                        btn.href = intentUrl;
+                        
+                        // Eksekusi Auto-Redirect (Mental Otomatis)
+                        window.location.href = intentUrl;
+                    } else if (isIOS) {
+                        // Tampilkan instruksi manual titik 3 karena iPhone Apple memblokir pemaksaan otomatis
+                        document.getElementById('ios-instruction').style.display = 'block';
+                    }
+                }, 5000); 
             }
         });
     </script>
