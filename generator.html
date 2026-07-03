@@ -76,9 +76,9 @@
     <h2>Nice News Content Generator</h2>
     
     <div class="form-group">
-        <label for="keyword">Keyword Berita (Main Topic):</label>
-        <input type="text" id="keyword" placeholder="Contoh: jake paul tyson fight live" autocomplete="off">
-        <div class="note">Keyword ini akan digunakan sebagai nama file HTML dan Thumbnail Image Link.</div>
+        <label for="thumbnail">Link Gambar Thumbnail:</label>
+        <input type="text" id="thumbnail" placeholder="Contoh: https://domain.com/gambar-viral.jpg" autocomplete="off">
+        <div class="note">Masukkan URL gambar secara langsung. (Nama file HTML dan URL akan otomatis diambil dari Judul H1 di bawah).</div>
         
         <div id="rec-box" class="recommendation-box">
             Target URL Output Anda: <br>
@@ -112,14 +112,17 @@ fetch('domain.txt')
     })
     .catch(err => console.log('File domain.txt tidak ditemukan.'));
 
-const keywordInput = document.getElementById('keyword');
+const contentInput = document.getElementById('content');
 const recBox = document.getElementById('rec-box');
 const recLink = document.getElementById('rec-link');
 
-keywordInput.addEventListener('input', function() {
-    const keywordText = this.value.trim();
-    if (keywordText.length > 0) {
-        const slug = keywordText.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-');
+// Live preview URL sekarang mengambil dari baris pertama (H1) textarea
+contentInput.addEventListener('input', function() {
+    const lines = this.value.trim().split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    
+    if (lines.length > 0) {
+        const titleText = lines[0];
+        const slug = titleText.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-');
         const fullUrl = baseDomain + slug;
         recLink.href = fullUrl;
         recLink.textContent = fullUrl;
@@ -130,31 +133,39 @@ keywordInput.addEventListener('input', function() {
 });
 
 function generateAndDownload() {
-    const keywordInputVal = document.getElementById('keyword').value.trim();
-    const contentInput = document.getElementById('content').value.trim();
+    const thumbnailVal = document.getElementById('thumbnail').value.trim();
+    const contentInputVal = document.getElementById('content').value.trim();
     
-    if (!keywordInputVal || !contentInput) {
-        alert('Mohon isi kolom Keyword dan Isi Berita!');
+    if (!thumbnailVal || !contentInputVal) {
+        alert('Mohon isi kolom Link Gambar Thumbnail dan Isi Berita!');
         return;
     }
     
-    const keywordSlug = keywordInputVal.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-');
-    const fileName = keywordSlug + '.html';
-    const lines = contentInput.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-    
+    const lines = contentInputVal.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    if (lines.length < 1) {
+        alert('Isi berita minimal harus ada Judul (H1)!');
+        return;
+    }
+
     const h1Title = lines[0]; 
     const remainingParagraphs = lines.slice(1);
+    
+    // Generate nama file dari H1
+    const keywordSlug = h1Title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-');
+    const fileName = keywordSlug + '.html';
+    
+    // Hilangkan tanda kutip ganda/tunggal dari judul untuk script tag internal agar tidak error
+    const safeTitleForScript = h1Title.replace(/["']/g, '');
     
     // Teks Hidden Article
     let hiddenArticle = `<div style="display:none; visibility:hidden;">
             <h1>The Ultimate Guide to Making Money Online: Wealth Creation Through Trading and Cryptocurrency</h1>
-            <p>In today's rapidly evolving digital economy, learning how to make money online has transitioned from a niche concept into a highly lucrative global industry...</p>
+            <p>In today's rapidly evolving digital economy, learning how to make money online has transitioned from a niche concept into a highly lucrative global industry. Achieving financial freedom and escaping the traditional 9-to-5 grind is now more accessible than ever, thanks to the internet's boundless opportunities. Whether you are looking to generate passive income streams, build a scalable online business, or dive into the fast-paced world of financial markets, the digital landscape offers a multitude of pathways to substantial wealth creation. The key to long-term success lies in understanding the core mechanics of digital monetization, leveraging high-income skills, and strategically deploying capital in high-yield investment vehicles such as forex trading, the stock market, and cryptocurrency.</p>
+            <p>Before diving into complex financial markets, it is crucial to establish foundational streams of passive income. Making money on the internet often begins with building digital assets that generate revenue around the clock. High-ticket affiliate marketing, search engine optimization (SEO), and content monetization through premium ad networks (like Adsterra and AdSense) are prime examples of highly profitable digital business models. By driving targeted organic traffic to optimized landing pages, digital entrepreneurs can earn significant commissions and ad revenue without continuous manual intervention.</p>
         </div>`;
     
-    // Gambar Utama menjadi Tautan Thumbnail Image
-    const queryImage = keywordInputVal + " breaking news";
-    const mainImageUrl = 'https://tse1.mm.bing.net/th?q=' + encodeURIComponent(queryImage) + '&w=800&h=450&c=7&rs=1&p=0&dpr=1.5&pid=1.7';
-    let imageLinkHtml = `<div class="detail-image"><a href="${mainImageUrl}" target="_blank" title="View Image"><img src="${mainImageUrl}" alt="${h1Title}"></a></div>`;
+    // Gambar Utama menggunakan inputan Link Thumbnail
+    let imageLinkHtml = `<div class="detail-image"><a href="${thumbnailVal}" target="_blank" title="View Image"><img src="${thumbnailVal}" alt="${h1Title}"></a></div>`;
 
     let pBodyHtml = remainingParagraphs.map(p => `<p>${p}</p>`).join('\n');
 
@@ -202,15 +213,16 @@ function generateAndDownload() {
         <div class="container"><p>&copy; 2026 Nice News - The Pulse of Trending Stories.</p></div>
     </footer>
 
+    <!-- Script Internal untuk load related keywords sebagai thumbnail link -->
     <script>
         (function(){
             const keywords = [
-                "${keywordInputVal} viral video",
-                "${keywordInputVal} latest update",
-                "${keywordInputVal} today",
-                "${keywordInputVal} breaking news",
-                "${keywordInputVal} real story",
-                "${keywordInputVal} live feed"
+                "${safeTitleForScript} viral video",
+                "${safeTitleForScript} latest update",
+                "${safeTitleForScript} today",
+                "${safeTitleForScript} breaking news",
+                "${safeTitleForScript} real story",
+                "${safeTitleForScript} live feed"
             ];
             const hookWords = ['Breaking:', 'Trending:', 'Watch:', 'Exclusive:', 'Viral:'];
             const suffixWords = ['Revealed', 'Explained', 'Live Update', 'News'];
