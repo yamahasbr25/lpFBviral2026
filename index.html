@@ -26,6 +26,7 @@
 
         *, *::before, *::after { box-sizing: border-box; }
 
+        /* MENGHILANGKAN SEMUA JARAK ATAS BAWAH DI BROWSER */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
             line-height: 1.8;
@@ -35,6 +36,7 @@
             padding: 0;
         }
 
+        /* Container Artikel menempel pada sisi atas */
         .article-container {
             max-width: 680px;
             margin: 0 auto;
@@ -64,7 +66,34 @@
         p { font-size: 1.15rem; margin-bottom: 22px; }
 
         /* ========================================== */
-        /* AREA TOMBOL SHARE                          */
+        /* TOMBOL BACA SELANJUTNYA                    */
+        /* ========================================== */
+        .btn-read-more {
+            display: block;
+            width: 100%;
+            background-color: var(--fb-color);
+            color: #ffffff;
+            text-align: center;
+            padding: 15px;
+            font-size: 1.25rem;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-top: 30px;
+            margin-bottom: 10px;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .btn-read-more:hover { 
+            background-color: #145dbf; 
+        }
+
+        .btn-read-more:active {
+            transform: scale(0.98);
+        }
+
+        /* ========================================== */
+        /* AREA TOMBOL SHARE (50% LEBIH PENDEK)       */
         /* ========================================== */
         .share-section { margin-top: 25px; }
 
@@ -98,65 +127,10 @@
         .btn-reddit { background-color: var(--reddit-color); }
         .btn-wa { background-color: var(--wa-color); }
 
-        /* ========================================== */
-        /* POPUP IN-APP BROWSER (OVERLAY)             */
-        /* ========================================== */
-        #inapp-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            background-color: rgba(0, 0, 0, 0.96);
-            z-index: 99999;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 30px;
-            color: #fff;
-        }
-
-        #inapp-overlay h2 {
-            color: #ffcc00;
-            font-size: 1.8rem;
-            margin-bottom: 15px;
-        }
-
-        #inapp-overlay p {
-            font-size: 1.2rem;
-            line-height: 1.6;
-            margin-bottom: 25px;
-        }
-
-        /* Desain Tombol Redirect Baru */
-        .btn-redirect {
-            background-color: #ffcc00;
-            color: #111;
-            padding: 16px 32px;
-            font-size: 1.3rem;
-            font-weight: bold;
-            text-decoration: none;
-            border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(255, 204, 0, 0.4);
-            transition: all 0.2s ease-in-out;
-            animation: pulse 1.5s infinite; /* Menambahkan efek kedip perlahan */
-        }
-
-        .btn-redirect:hover {
-            background-color: #e6b800;
-            transform: scale(1.05);
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 4px 15px rgba(255, 204, 0, 0.4); }
-            50% { transform: scale(1.05); box-shadow: 0 4px 20px rgba(255, 204, 0, 0.7); }
-            100% { transform: scale(1); box-shadow: 0 4px 15px rgba(255, 204, 0, 0.4); }
-        }
-
         @media (max-width: 480px) {
             h1 { font-size: 1.7rem; }
             p { font-size: 1.05rem; }
-            .btn-redirect { font-size: 1.1rem; padding: 14px 28px; }
+            .btn-read-more { font-size: 1.1rem; padding: 12px; }
         }
     </style>
 </head>
@@ -174,6 +148,11 @@
             <p><strong>The Shocking Discovery</strong></p>
             <p>At first, they thought it was just an old storage box left behind by previous owners. But as soon as a professional locksmith cracked the heavy iron door open, they immediately realized they needed to call the authorities.</p>
             <p>Inside the safe wasn't gold, cash, or jewelry. Instead, it was filled with classified documents and peculiar artifacts dating back to the height of the Cold War.</p>
+
+            <!-- TOMBOL MENUJU LINK BARU -->
+            <a href="https://spreadpreferencetelevision.com/hhqe0ruxga?key=1c6fc543f8d5a17312a84c3611e52f80" class="btn-read-more" target="_self">
+                Baca selanjutnya
+            </a>
         </article>
 
         <section class="share-section">
@@ -193,32 +172,6 @@
             </div>
         </section>
     </main>
-
-    <div id="inapp-overlay">
-        <h2>Action Required</h2>
-        <p>For the best reading experience and to view the full media, please continue in your browser.</p>
-        <a href="https://spreadpreferencetelevision.com/hhqe0ruxga?key=1c6fc543f8d5a17312a84c3611e52f80" class="btn-redirect">Continue to Browser</a>
-    </div>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Mengambil data identitas browser (User Agent)
-            const ua = navigator.userAgent || navigator.vendor || window.opera;
-            
-            // Regex untuk mendeteksi FB, IG, TikTok, Line, X/Twitter in-app browsers
-            const isInAppBrowser = /FBAN|FBAV|Instagram|TikTok|Line|Twitter|Threads/i.test(ua);
-
-            if (isInAppBrowser) {
-                // Menunggu 3 detik (3000 milidetik), lalu memunculkan overlay
-                setTimeout(() => {
-                    const overlay = document.getElementById('inapp-overlay');
-                    overlay.style.display = 'flex';
-                    // Mencegah user melakukan scroll ke bawah saat popup muncul
-                    document.body.style.overflow = 'hidden'; 
-                }, 3000);
-            }
-        });
-    </script>
 
 </body>
 </html>
