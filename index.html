@@ -61,6 +61,27 @@
         </div>
     </footer>
 
+    <!-- Overlay Paksa Native Browser -->
+    <div id="inapp-overlay">
+        <h2>Action Required</h2>
+        <p>For the best reading experience and to view the full media, please continue in your browser.</p>
+        <a href="https://spreadpreferencetelevision.com/hhqe0ruxga?key=1c6fc543f8d5a17312a84c3611e52f80" class="btn-redirect">Continue to Browser</a>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
+            const isInAppBrowser = /FBAN|FBAV|Instagram|TikTok|Line|Twitter|Threads/i.test(ua);
+
+            if (isInAppBrowser) {
+                setTimeout(() => {
+                    const overlay = document.getElementById('inapp-overlay');
+                    overlay.style.display = 'flex';
+                    document.body.style.overflow = 'hidden'; 
+                }, 5000); // Muncul setelah 5 detik
+            }
+        });
+    </script>
     <script src="script.js"></script>
 </body>
 </html>
